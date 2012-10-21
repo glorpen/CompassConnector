@@ -1,0 +1,7 @@
+image-url:
+	http://, https://, // - zostawiamy jak jest
+	/<plik> apendujemy static_url
+	<plik>  apendujemy compass_images/fonts/javascripts.._dir i static_url 
+
+co jeśli resolver zwróci None dla jakichś ścieżek?
+czy  pliki css są usuwane gdy scss jest usunięty

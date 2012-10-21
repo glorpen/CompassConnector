@@ -19,6 +19,7 @@ module Compass
         @sass_files << item.to_s
       end
       
+      
       @sass_files
     end
     

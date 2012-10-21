@@ -1,7 +1,7 @@
 require "compass/sprite_importer"
 
 module Compass
-  class SpriteImporter < Sass::Importers::Base
+  class SpriteImporter
     # Returns the Glob of image files for the uri
     def self.files(uri)
       
@@ -15,13 +15,6 @@ module Compass
       end
       
       raise Compass::SpriteException, %Q{No files were found in the load path matching "#{uri}".}
-    end
-    
-    # The on-disk location of this sprite
-    def self.path(uri)
-      path, _ = path_and_name(uri)
-      p path
-      path
     end
     
   end

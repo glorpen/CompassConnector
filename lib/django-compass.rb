@@ -1,8 +1,5 @@
 require 'compass'
 
-Compass::Configuration.add_configuration_property(:django_settings, "this is a foobar")
-Compass::Configuration.add_configuration_property(:virtual_env, "this is a foobar")
-
 class DjangoCompass
   
   def self.resolver
@@ -24,22 +21,29 @@ class DjangoCompass
       "DjangoCompass::Importer"
     end
     def find(uri, options)
-      f = DjangoCompass.resolver.find_scss(uri+".scss")
-      f = DjangoCompass.resolver.find_scss("_"+uri+".scss")
+      f = DjangoCompass.resolver.find_scss(uri)
       
-      f = f.to_s
+      if f
+        f = f.to_s
+        syntax = (f =~ /\.(s[ac]ss)$/) && $1.to_sym || :sass
+        opts = options.merge(:syntax => syntax)
+        return Sass::Engine.new(open(f).read, opts)
+      end
       
-      syntax = (f =~ /\.(s[ac]ss)$/) && $1.to_sym || :sass
-      opts = options.merge(:syntax => syntax)
-      return Sass::Engine.new(open(f.to_s).read, opts)
+      nil
+    end
+    def find_relative(uri, base, options)
+      nil
+    end
+    def mtime(uri, options)
+      nil
     end
   end
 end
 
-#require 'django-compass/patches/importer'
 require 'django-compass/patches/compiler'
 require 'django-compass/patches/urls'
 require 'django-compass/patches/sprite_image'
 require 'django-compass/patches/sprite_map'
 require 'django-compass/patches/sprite_importer'
-#require 'django-compass/patches/3_1'
+require 'django-compass/patches/watch_project'
