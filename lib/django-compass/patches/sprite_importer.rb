@@ -1,38 +1,28 @@
-require 'sprockets'
-require 'compass/sprite_importer'
+require "compass/sprite_importer"
 
 module Compass
   class SpriteImporter < Sass::Importers::Base
-
-    alias :old_find :find
-
-    def find(uri, options)
-
-      if old = old_find(uri, options)
-        @_options = options
-        self.class.files(uri).each do |file|
-          if pathname = resolve(file)
-            context.depend_on(pathname)
-          end
-        end
+    # Returns the Glob of image files for the uri
+    def self.files(uri)
+      
+      files = []
+      DjangoCompass.resolver.find_sprites_matching(uri).to_enum.each do |item|
+        files << item.to_s
       end
-
-      old
+      
+      if not files.empty?
+        return files
+      end
+      
+      raise Compass::SpriteException, %Q{No files were found in the load path matching "#{uri}".}
     end
-
-  private
-
-    def resolve(uri)
-      resolver.resolve(Pathname.new(uri))
+    
+    # The on-disk location of this sprite
+    def self.path(uri)
+      path, _ = path_and_name(uri)
+      p path
+      path
     end
-
-    def context
-     resolver.context
-    end
-
-    def resolver
-      @_options[:custom][:resolver]
-    end
-
+    
   end
 end
