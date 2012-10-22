@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.email       = 'admin@glorpen.pl'
   s.files       = Dir['lib/**/*.rb']
   s.license	= 'GPL-3'
-  s.post_install_message = "TO usi this gem you should install django-compass app in your Django project"
+  s.post_install_message = "To use this gem you should install django-compass app in your Django project"
   s.homepage    = 'http://bitbucket.org/glorpen/django-compass-ruby'
   s.add_runtime_dependency 'rubypython'
   s.add_runtime_dependency 'compass'
