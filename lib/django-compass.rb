@@ -14,6 +14,7 @@ class DjangoCompass
     settings = RubyPython.import(ENV["DJANGO_SETTINGS_MODULE"])
     @resolver = RubyPython.import("djangocompass.ruby_resolver").resolver
     #RubyPython.stop
+    
   end
   
   class Importer < Sass::Importers::Base
