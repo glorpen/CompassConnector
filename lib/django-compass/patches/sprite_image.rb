@@ -5,7 +5,7 @@ module Compass
     module Sprites
       class Image
         def find_file
-          DjangoCompass.resolver.find_sprite(relative_file).to_s
+          DjangoCompass.resolver("find_sprite", relative_file).to_s
         end
       end
     end

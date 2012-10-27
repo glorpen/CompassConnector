@@ -32,9 +32,8 @@ module Compass
       
         begin
         FSSM.monitor do |monitor|
-          #p DjangoCompass.resolver.list_scss_dirs.to_a
           paths = Compass.configuration.sass_load_paths
-          DjangoCompass.resolver.list_scss_dirs().to_enum.each do |item|
+          DjangoCompass.resolver("list_scss_dirs").to_enum.each do |item|
             paths << item.to_s
           end
           

@@ -10,9 +10,9 @@ module Compass
       
       @sass_files = []
       if exclude_partials
-        out = DjangoCompass.resolver.list_main_files()
+        out = DjangoCompass.resolver("list_main_files")
       else
-        out = DjangoCompass.resolver.list_scss_files()
+        out = DjangoCompass.resolver("list_scss_files")
       end
       
       out.to_enum.each do |item|
@@ -30,7 +30,7 @@ module Compass
     
     # A sass engine for compiling a single file.
     def engine(sass_filename, css_filename)
-      sass_filename = DjangoCompass.resolver.find_scss(sass_filename).to_s
+      sass_filename = DjangoCompass.resolver("find_scss",sass_filename).to_s
       syntax = (sass_filename =~ /\.(s[ac]ss)$/) && $1.to_sym || :sass
       opts = sass_options.merge(:filename => sass_filename, :css_filename => css_filename, :syntax => syntax)
       Sass::Engine.new(open(sass_filename).read, opts)

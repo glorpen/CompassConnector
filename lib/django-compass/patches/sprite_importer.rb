@@ -6,7 +6,7 @@ module Compass
     def self.files(uri)
       
       files = []
-      DjangoCompass.resolver.find_sprites_matching(uri).to_enum.each do |item|
+      DjangoCompass.resolver("find_sprites_matching", uri).to_enum.each do |item|
         files << item.to_s
       end
       

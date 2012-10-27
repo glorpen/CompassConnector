@@ -1,20 +1,15 @@
 require 'compass'
+require 'yaml'
+require "shellwords"
 
 class DjangoCompass
   
-  def self.resolver
-    if defined? @resolver
-      return @resolver
+  def self.resolver(method, *args)
+    cmd = "python -m djangocompass.ruby_resolver "+method
+    args.each do |i|
+      cmd += " "+Shellwords.escape(i)
     end
-    
-    require 'rubypython'
-    RubyPython.start()
-    
-    #initialize app
-    settings = RubyPython.import(ENV["DJANGO_SETTINGS_MODULE"])
-    @resolver = RubyPython.import("djangocompass.ruby_resolver").resolver
-    #RubyPython.stop
-    
+    return YAML::load(`#{cmd}`)
   end
   
   class Importer < Sass::Importers::Base
@@ -22,7 +17,7 @@ class DjangoCompass
       "DjangoCompass::Importer"
     end
     def find(uri, options)
-      f = DjangoCompass.resolver.find_scss(uri)
+      f = DjangoCompass.resolver("find_scss", uri)
       
       if f
         f = f.to_s
