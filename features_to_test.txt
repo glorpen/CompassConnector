@@ -5,3 +5,5 @@ image-url:
 
 co jeśli resolver zwróci None dla jakichś ścieżek?
 czy  pliki css są usuwane gdy scss jest usunięty
+
+w Sass::Importers::Base jest possible_files, należy zapewne jakąś metodę jeszcze zmienić by wszystko wyszukiwało w django
