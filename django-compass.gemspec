@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'django-compass'
-  s.version     = '0.3'
+  s.version     = '0.4'
   s.date        = '2012-11-04'
   s.summary     = "Compass integration with Django"
   s.description = "Allows better integration between Django and Compass"
