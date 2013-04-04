@@ -1,0 +1,6 @@
+@import "compass/css3/images";
+
+images {
+    vendor-image-url: image-url("vendor-image.png");
+    app-image-url: image-url("/image.png");
+}

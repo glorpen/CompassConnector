@@ -1,51 +1,52 @@
 require 'compass'
-require 'yaml'
-require "shellwords"
+require 'json'
 
-class DjangoCompass
-  
-  def self.resolver(method, *args)
-    cmd = "python -m djangocompass.ruby_resolver "+method
-    args.each do |i|
-      cmd += " "+Shellwords.escape(i)
-    end
-    return YAML::load(`#{cmd}`)
-  end
-  
-  class Importer < Sass::Importers::Base
-    def to_s()
-      "DjangoCompass::Importer"
-    end
+require 'django-compass/importer'
+require 'django-compass/configuration'
+
+extension_path = File.expand_path(File.join(File.dirname(__FILE__), ".."))
+Compass::Frameworks.register('my_extension', :path => extension_path)
+
+module CompassConnector
+
+  class Resolver
     
-    def find(uri, options)
-      f = DjangoCompass.resolver("find_scss", uri)
-      
-      if f
-        f = f.to_s
-        syntax = (f =~ /\.(s[ac]ss)$/) && $1.to_sym || :sass
-        opts = options.merge(:syntax => syntax, :importer => self, :filename => f)
-        return Sass::Engine.new(open(f).read, opts)
+    @process = nil
+    
+    private_class_method
+      def self.resolver(method, *args)
+        if @process == nil
+          cmd = ENV["COMPASS_CONNECTOR"]
+          if cmd == nil
+            raise Compass::Error, "You have to define COMPASS_CONNECTOR env variable"
+          end
+          @process = IO.popen(cmd, "r+")
+        end
+        
+        data_in = JSON::dump({'method' => method, 'args' => args})
+        print "Process input: ", data_in, "\n"
+        @process << data_in << "\n"
+        out = @process.gets
+        print "Process output: ", out
+        return JSON::load(out)
       end
-      
-      nil
-    end
     
-    def find_relative(uri, base, options)
-      nil
-    end
     
-    def mtime(name, options)
-      file, s = find_real_file(name)
-      File.mtime(file) if file
-    rescue Errno::ENOENT
-      nil
+    def self.find_scss(uri)
+      resolver("find_scss", uri)
     end
-    
-    def key(name, options)
-      [self.class.name + ":" + File.dirname(File.expand_path(name)),
-        File.basename(name)]
+    def self.list_main_files()
+      resolver("list_main_files")
     end
+    def self.image_url(path)
+      resolver("image_url", path)
+    end
+    def self.find_image(path)
+      resolver("find_image", path)
+    end
+  
   end
+
 end
 
 require 'django-compass/patches/compiler'

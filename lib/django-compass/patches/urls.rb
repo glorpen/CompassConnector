@@ -4,7 +4,7 @@ module Compass::SassExtensions::Functions::Urls
   module ImageUrl
     def image_url(path, only_path = Sass::Script::Bool.new(false), cache_buster = Sass::Script::Bool.new(true))
       path = path.value
-      path = DjangoCompass.resolver("image_url", path)
+      path = CompassConnector::Resolver.image_url(path)
       
       if only_path.to_bool
         Sass::Script::String.new(clean_path(path))
