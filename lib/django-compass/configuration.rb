@@ -1,17 +1,9 @@
 require "compass/configuration"
 
-#Compass.configuration.output_style = "compressed"
-#Compass.configuration.line_comments = false
-#Compass.configuration.environment = "production"
-
-module Compass
-  module Configuration
-    module Defaults
-      
-      def default_environment
-        :production
-      end
-
-    end
+CompassConnector::Resolver.configuration().each do |key,value|
+  if value.is_a?String and value.start_with?(":")
+    value[0]=''
+    value = value.to_sym
   end
+  Compass.configuration.send(key+"=", value)
 end

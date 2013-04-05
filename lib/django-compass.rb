@@ -2,10 +2,6 @@ require 'compass'
 require 'json'
 
 require 'django-compass/importer'
-require 'django-compass/configuration'
-
-extension_path = File.expand_path(File.join(File.dirname(__FILE__), ".."))
-Compass::Frameworks.register('my_extension', :path => extension_path)
 
 module CompassConnector
 
@@ -44,11 +40,22 @@ module CompassConnector
     def self.find_image(path)
       resolver("find_image", path)
     end
+    def self.find_sprites_matching(uri)
+      resolver("find_sprites_matching", uri)
+    end
+    def self.find_sprite(file)
+      resolver("find_sprite", file)
+    end
+    
+    def self.configuration()
+      resolver("get_configuration")
+    end
   
   end
 
 end
 
+require 'django-compass/configuration'
 require 'django-compass/patches/compiler'
 require 'django-compass/patches/urls'
 require 'django-compass/patches/sprite_image'

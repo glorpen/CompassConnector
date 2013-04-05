@@ -20,6 +20,17 @@ class Handler(object):
 	public_images = "images/"
 	public_vendors = "vendors/"
 	
+	#TODO collect file paths and mtimes
+	
+	def get_configuration(self):
+		return {
+			"environment" : ":development",
+			"line_comments": True,
+			"output_style" : ":expanded", #nested, expanded, compact, compressed
+			"http_path" : "/compass-vendor-assets",
+			"generated_images_dir": "generated-images"
+		}
+	
 	#list main scss files (which are compiled to own css)
 	def list_main_files(self):
 		ret = []
@@ -58,7 +69,13 @@ class Handler(object):
 		else: #vendor
 			#TODO: self.public_vendors
 			return self.images_root + "/" + path.split("/")[1]
-		
+	
+	def find_sprites_matching(self, path):
+		pre,post = path.split("*")
+		return [pre+i for i in os.listdir(join(realpath(dirname(__file__)),pre[1:]))]
+	
+	def find_sprite(self, path):
+		return join(realpath(dirname(__file__)),path[1:])
 
 h = Handler()
 
