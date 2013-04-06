@@ -9,22 +9,44 @@ without "private" folder - just single / is for app and without is for vendors
 import sys, simplejson
 from os.path import dirname,realpath,exists,join
 import os
+import re
+import traceback
 
-"""
-fonty tylko w public,
-images mogą być w public i ukrytym
-"""
+root = realpath(dirname(__file__))
+
+re_schema = re.compile(r'^(([a-z0-9]+://)|(//))')
+
+def detect_vendor(allow_absolute=True):
+	
+	def decorator(fun):
+		def wrapper(self, path):
+			absolute = re_schema.match(path) is not None
+			if absolute:
+				if not allow_absolute:
+					raise Exception()
+				else:
+					return path
+			vendor = not absolute and not path.startswith("/")
+			return fun(self, path, vendor)
+		return wrapper
+	
+	return decorator
 
 class Handler(object):
 	
-	scss_root = realpath(dirname(__file__))+"/scss"
-	images_root = realpath(dirname(__file__))+"/images"
-	vendors_root = realpath(dirname(__file__))+"/vendor"
+	scss_root = join(root,"scss")
+	images_root = join(root,"images")
+	fonts_root = join(root,"fonts")
+	vendors_root = join(root,"vendors")
 	
-	public_fonts = "fonts/"
-	public_css = "css/"
-	public_images = "images/"
-	public_vendors = "vendors/"
+	out_generated_images_root = join(root,"out","generated-images")
+	out_stylesheets_root = join(root,"out","css")
+	
+	public_fonts = "/fonts/"
+	public_css = "/css/"
+	public_images = "/images/"
+	public_vendors = "/vendors/"
+	public_generated_images = "/generated-images/"
 	
 	#TODO collect file paths and mtimes
 	
@@ -34,23 +56,27 @@ class Handler(object):
 			"line_comments": True,
 			"output_style" : ":expanded", #nested, expanded, compact, compressed
 			
-			"generated_images_path" : "out/generated-images", #disk path
-			"css_path" : "out/css",
+			"generated_images_path" : self.out_generated_images_root,
+			"css_path" : self.out_stylesheets_root,
 			
 			"http_path" : "/",
 			"relative_assets": False
 		}
 	
-	#list main scss files (which are compiled to own css)
 	def list_main_files(self):
+		"""
+		list main scss files (which are compiled to own css)
+		"""
 		ret = []
 		for i in os.listdir(self.scss_root):
 			if not i.startswith("_") and i.endswith(".scss"):
 				ret.append(i)
 		return ret
 	
-	#return real path for scss (?)
 	def find_scss(self, path):
+		"""
+		return full path for scss
+		"""
 		base, file = os.path.split(path)
 		
 		#maybe from @import - without extension
@@ -62,52 +88,52 @@ class Handler(object):
 		#if not, try with underscore
 		return f if exists(f) else join(self.scss_root, base, "_"+file)
 	
-	def image_url(self, path):
-		if path.startswith("http://") or path.startswith("https://") or path.startswith("//"):
-			return path
-		if path.startswith("/"):
-			# image from your app
-			return self.public_images + path[1:]
+	@detect_vendor(True)
+	def get_image_url(self, path, vendor):
+		if vendor:
+			return self.public_vendors + "images/" + path
 		else:
-			#probably from vendors
-			#you should mount vendor assets under some path
-			return self.public_vendors + path
+			return self.public_images + path[1:]
 	
-	def find_image(self, path):
-		if path.startswith("/"):
+	@detect_vendor(False)
+	def find_image(self, path, vendor):
+		if vendor:
+			return join(self.vendors_root, "images", path)
+		else:
 			return self.images_root + path
-		else: #vendor
-			#TODO: self.public_vendors
-			return self.images_root + "/" + path.split("/")[1]
+			
 	
 	def find_generated_image(self, path):
-		return path
+		return join(self.out_generated_images_root, path.lstrip("/"))
 	
-	def generated_image_url(self, path):
-		return "/asd/" + path
+	@detect_vendor(True)
+	def get_generated_image_url(self, path, vendor):
+		#all generated images will end up in our path
+		return self.public_generated_images + path.lstrip("/")
 	
 	def find_sprites_matching(self, path):
 		pre,post = path.split("*")
 		return [pre+i for i in os.listdir(join(realpath(dirname(__file__)),pre[1:]))]
-	
 	def find_sprite(self, path):
 		return join(realpath(dirname(__file__)),path[1:])
-	def font_url(self, path):
-		"""
-		@return: virtual path for font
-		"""
-		return self.public_fonts + path
-	def find_font(self, path):
-		"""
-		@return: real path for font file
-		"""
-		return join(realpath(dirname(__file__)),'fonts', path)
 	
-	def stylesheet_url(self, path):
-		"""
-		@return: just virtual path
-		"""
-		return path
+	@detect_vendor(True)
+	def get_font_url(self, path, vendor):
+		if vendor:
+			return join(self.public_vendors, "fonts", path)
+		else:
+			return self.public_fonts + path
+	
+	@detect_vendor(False)
+	def find_font(self, path, vendor):
+		if vendor:
+			return join(self.vendors_root, "fonts", path)
+		else:
+			return join(self.fonts_root, path.lstrip("/"))
+	
+	@detect_vendor(True)
+	def get_stylesheet_url(self, path, vendor):
+		return self.public_css + path
 	
 
 h = Handler()
@@ -119,7 +145,11 @@ else:
 		line = sys.stdin.readline()
 		if line == "":
 			break
-		d = simplejson.JSONDecoder().decode(line)
-		ret = getattr(h, d["method"])(*d["args"])
-		sys.stdout.write(simplejson.JSONEncoder().encode(ret) + "\n")
-		sys.stdout.flush()
+		try:
+			d = simplejson.JSONDecoder().decode(line)
+			ret = getattr(h, d["method"])(*d["args"])
+			sys.stdout.write(simplejson.JSONEncoder().encode(ret) + "\n")
+			sys.stdout.flush()
+		except Exception as e:
+			sys.stdout.write(simplejson.JSONEncoder().encode({"error":traceback.format_exc()}) + "\n")
+			sys.stdout.flush()

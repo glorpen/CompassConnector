@@ -20,11 +20,15 @@ module CompassConnector
         end
         
         data_in = JSON::dump({'method' => method, 'args' => args})
-        print "Process input: ", data_in, "\n"
+        #$stdout.puts "Process input: " + data_in
         @process << data_in << "\n"
         out = @process.gets
-        print "Process output: ", out
-        return JSON::load(out)
+        #$stdout.puts "Process output: " + out
+        ret = JSON::load(out)
+        if ret.kind_of?(Hash) and ret.has_key?("error")
+          raise Compass::Error, "Remote process error: " + ret["error"]
+        end
+        return ret
       end
     
     
@@ -35,13 +39,13 @@ module CompassConnector
       resolver("list_main_files")
     end
     def self.image_url(path)
-      resolver("image_url", path)
+      resolver("get_image_url", path)
     end
     def self.find_image(path)
       resolver("find_image", path)
     end
     def self.generated_image_url(path)
-      resolver("generated_image_url", path)
+      resolver("get_generated_image_url", path)
     end
     def self.find_generated_image(path)
       resolver("find_generated_image", path)
@@ -56,10 +60,10 @@ module CompassConnector
       resolver("find_font", path)
     end
     def self.font_url(path)
-      resolver("font_url", path)
+      resolver("get_font_url", path)
     end
     def self.stylesheet_url(path)
-      resolver("stylesheet_url", path)
+      resolver("get_stylesheet_url", path)
     end
     
     def self.configuration()

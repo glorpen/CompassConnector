@@ -4,8 +4,9 @@ module Compass::SassExtensions::Functions::Urls
   module ImageUrl
     def image_url(path, only_path = Sass::Script::Bool.new(false), cache_buster = Sass::Script::Bool.new(true))
       path = path.value
-      path = CompassConnector::Resolver.image_url(path)
+      
       real_path = CompassConnector::Resolver.find_image(path)
+      path = CompassConnector::Resolver.image_url(path)
       
       # Compute and append the cache buster if there is one.
       if cache_buster.to_bool
@@ -52,8 +53,9 @@ module Compass::SassExtensions::Functions::Urls
   module GeneratedImageUrl
     def generated_image_url(path, cache_buster = Sass::Script::Bool.new(false))
       path = path.value # get to the string value of the literal.
-      path = CompassConnector::Resolver.generated_image_url(path)
+      
       real_path = CompassConnector::Resolver.find_generated_image(path)
+      path = CompassConnector::Resolver.generated_image_url(path)
       
       # Compute and append the cache buster if there is one.
       if cache_buster.to_bool

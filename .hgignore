@@ -1,6 +1,8 @@
 syntax: regexp
 ^\.buildpath$
 ^\.project$
+^\.settings$
 ^\.pydevproject$
-^test_project/out$
 ^test_project/.sass-cache$
+^test_project/out/css$
+^test_project/out/generated-images/sprites$
