@@ -1,7 +1,7 @@
 require 'compass'
 require 'json'
 
-require 'django-compass/importer'
+require 'compass-connector/importer'
 
 module CompassConnector
 
@@ -74,11 +74,11 @@ module CompassConnector
 
 end
 
-require 'django-compass/configuration'
-require 'django-compass/patches/compiler'
-require 'django-compass/patches/urls'
-require 'django-compass/patches/sprite_image'
-require 'django-compass/patches/sprite_map'
-require 'django-compass/patches/sprite_importer'
-require 'django-compass/patches/image_size'
-require 'django-compass/patches/inline_images'
+require 'compass-connector/configuration'
+require 'compass-connector/patches/compiler'
+require 'compass-connector/patches/urls'
+require 'compass-connector/patches/sprite_image'
+require 'compass-connector/patches/sprite_map'
+require 'compass-connector/patches/sprite_importer'
+require 'compass-connector/patches/image_size'
+require 'compass-connector/patches/inline_images'

@@ -4,7 +4,7 @@ module CompassConnector
   
   class Importer < Sass::Importers::Base
     def to_s()
-      "DjangoCompass::Importer"
+      "CompassConnector::Importer"
     end
     
     def find(uri, options)
