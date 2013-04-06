@@ -2,8 +2,10 @@
 
 font-face {
     @include font-face("this name", font-files("this.woff", woff, "this.otf", opentype), "this.eot");
+    /* @test src: url('/vendors/fonts/this.eot'); */
 }
 
 font-inline {
-	inline-font: inline-font-files("NotoSans-Bold.ttf", "truetype"); 
+	inline-font: inline-font-files("NotoSans-Bold.ttf", "truetype");
+	/* @test url('data:font/truetype;base64,AAEAAAARAQAABAAQR0RFRnJ.* */
 }

@@ -1,2 +1,3 @@
 @import "/sprites/something/*.png";
-@include all-something-sprites;
+@include something-sprites(red);
+/* @test url('/generated-images/sprites/something-[0-9a-z]+\.png */
