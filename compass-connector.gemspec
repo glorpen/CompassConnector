@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.email       = 'admin@glorpen.pl'
   s.files       = Dir['lib/**/*.rb']
   s.license	= 'GPL-3'
-  s.post_install_message = "To properly use this gem you should install connector app for your project"
+  s.post_install_message = "To fully utilize this gem you should install connector app for your project"
   s.homepage    = 'http://bitbucket.org/glorpen/compass-connector'
   s.add_runtime_dependency 'compass'
 end

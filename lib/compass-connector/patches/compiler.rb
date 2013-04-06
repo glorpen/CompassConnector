@@ -9,24 +9,27 @@ module Compass
     def sass_files(options = {})
       exclude_partials = options.fetch(:exclude_partials, true)
       
-      @sass_files = []
-      if exclude_partials
-        out = CompassConnector::Resolver.list_main_files
+      if self.options[:sass_files] != nil
+        @sass_files = self.options[:sass_files]
       else
-        out = CompassConnector::Resolver.list_scss_files
+        @sass_files = []
+        if exclude_partials
+          out = CompassConnector::Resolver.list_main_files
+        else
+          out = CompassConnector::Resolver.list_scss_files
+        end
+        
+        out.to_enum.each do |item|
+          @sass_files << item.to_s
+        end
+        
       end
-      
-      out.to_enum.each do |item|
-        @sass_files << item.to_s
-      end
-      
       
       @sass_files
     end
     
     def stylesheet_name(sass_file)
       sass_file[0..-6].sub(/\.css$/,'')
-      #raise Compass::Error, "You must compile individual stylesheets from the project directory."
     end
     
     # A sass engine for compiling a single file.
@@ -43,6 +46,14 @@ module Compass
          @sass_options[:load_paths] << ::CompassConnector::Importer.new()
       end
       @sass_options
+    end
+    
+    def corresponding_css_file(sass_file)
+      if sass_file.start_with? from
+        sass_file = sass_file[from.length+1 .. -1]
+      end
+      
+     "#{to}/#{stylesheet_name(sass_file)}.css"
     end
   end
 end

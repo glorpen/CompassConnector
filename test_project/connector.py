@@ -58,6 +58,7 @@ class Handler(object):
 			
 			"generated_images_path" : self.out_generated_images_root,
 			"css_path" : self.out_stylesheets_root,
+			"sass_path" : self.scss_root,
 			
 			"http_path" : "/",
 			"relative_assets": False
