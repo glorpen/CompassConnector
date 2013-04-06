@@ -40,11 +40,26 @@ module CompassConnector
     def self.find_image(path)
       resolver("find_image", path)
     end
+    def self.generated_image_url(path)
+      resolver("generated_image_url", path)
+    end
+    def self.find_generated_image(path)
+      resolver("find_generated_image", path)
+    end
     def self.find_sprites_matching(uri)
       resolver("find_sprites_matching", uri)
     end
     def self.find_sprite(file)
       resolver("find_sprite", file)
+    end
+    def self.find_font(path)
+      resolver("find_font", path)
+    end
+    def self.font_url(path)
+      resolver("font_url", path)
+    end
+    def self.stylesheet_url(path)
+      resolver("stylesheet_url", path)
     end
     
     def self.configuration()
@@ -63,4 +78,3 @@ require 'django-compass/patches/sprite_map'
 require 'django-compass/patches/sprite_importer'
 require 'django-compass/patches/image_size'
 require 'django-compass/patches/inline_images'
-require 'django-compass/patches/watch_project'

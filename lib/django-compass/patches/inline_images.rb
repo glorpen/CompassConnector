@@ -13,7 +13,7 @@ module Compass::SassExtensions::Functions::InlineImage
     files = []
     while args.size > 0
       path = args.shift.value
-      real_path = DjangoCompass.resolver("find_font", path)
+      real_path = CompassConnector::Resolver.find_font(path)
       url = inline_image_string(data(real_path), compute_mime_type(path))
       files << "#{url} format('#{args.shift}')"
     end

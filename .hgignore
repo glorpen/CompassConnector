@@ -2,4 +2,5 @@ syntax: regexp
 ^\.buildpath$
 ^\.project$
 ^\.pydevproject$
-^test_project/stylesheets$
+^test_project/out$
+^test_project/.sass-cache$

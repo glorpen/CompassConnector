@@ -1,6 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+"""
+set loaded vendor paths from ruby env? //nope
+without "private" folder - just single / is for app and without is for vendors
+"""
+
 import sys, simplejson
 from os.path import dirname,realpath,exists,join
 import os
@@ -16,6 +21,7 @@ class Handler(object):
 	images_root = realpath(dirname(__file__))+"/images"
 	vendors_root = realpath(dirname(__file__))+"/vendor"
 	
+	public_fonts = "fonts/"
 	public_css = "css/"
 	public_images = "images/"
 	public_vendors = "vendors/"
@@ -27,8 +33,12 @@ class Handler(object):
 			"environment" : ":development",
 			"line_comments": True,
 			"output_style" : ":expanded", #nested, expanded, compact, compressed
-			"http_path" : "/compass-vendor-assets",
-			"generated_images_dir": "generated-images"
+			
+			"generated_images_path" : "out/generated-images", #disk path
+			"css_path" : "out/css",
+			
+			"http_path" : "/",
+			"relative_assets": False
 		}
 	
 	#list main scss files (which are compiled to own css)
@@ -70,12 +80,35 @@ class Handler(object):
 			#TODO: self.public_vendors
 			return self.images_root + "/" + path.split("/")[1]
 	
+	def find_generated_image(self, path):
+		return path
+	
+	def generated_image_url(self, path):
+		return "/asd/" + path
+	
 	def find_sprites_matching(self, path):
 		pre,post = path.split("*")
 		return [pre+i for i in os.listdir(join(realpath(dirname(__file__)),pre[1:]))]
 	
 	def find_sprite(self, path):
 		return join(realpath(dirname(__file__)),path[1:])
+	def font_url(self, path):
+		"""
+		@return: virtual path for font
+		"""
+		return self.public_fonts + path
+	def find_font(self, path):
+		"""
+		@return: real path for font file
+		"""
+		return join(realpath(dirname(__file__)),'fonts', path)
+	
+	def stylesheet_url(self, path):
+		"""
+		@return: just virtual path
+		"""
+		return path
+	
 
 h = Handler()
 

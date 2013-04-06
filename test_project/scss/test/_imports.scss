@@ -1,2 +1,7 @@
 @import "style.css";
 @import "/style.css";
+
+styles {
+	url1: stylesheet-url("style.css");
+	url2: stylesheet-url("style.css", true);
+} 

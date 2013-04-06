@@ -3,4 +3,9 @@
 images {
     vendor-image-url: image-url("vendor-image.png");
     app-image-url: image-url("/image.png");
+    width-app: image-width("/image.png");
+    width-vendor: image-width("vendors/image.png");
+    image-inline: inline-image("/1x1.png");
+    generated-image-busted: generated-image-url("1x1.png", true);
+    generated-image: generated-image-url("1x1.png", false); 
 }
