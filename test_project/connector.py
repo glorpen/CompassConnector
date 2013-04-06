@@ -133,7 +133,10 @@ class Handler(object):
 	
 	@detect_vendor(True)
 	def get_stylesheet_url(self, path, vendor):
-		return self.public_css + path
+		if vendor:
+			return self.public_vendors + "css/" + path
+		else:
+			return self.public_css + path.lstrip("/")
 	
 
 h = Handler()
@@ -141,15 +144,17 @@ h = Handler()
 if len(sys.argv)>1:
 	print getattr(h, sys.argv[1])(*sys.argv[2:])
 else:
+	decoder = simplejson.JSONDecoder()
+	encoder = simplejson.JSONEncoder()
 	while True:
 		line = sys.stdin.readline()
 		if line == "":
 			break
 		try:
-			d = simplejson.JSONDecoder().decode(line)
+			d = decoder.decode(line)
 			ret = getattr(h, d["method"])(*d["args"])
-			sys.stdout.write(simplejson.JSONEncoder().encode(ret) + "\n")
-			sys.stdout.flush()
+			sys.stdout.write(encoder.encode(ret) + "\n")
 		except Exception as e:
-			sys.stdout.write(simplejson.JSONEncoder().encode({"error":traceback.format_exc()}) + "\n")
+			sys.stdout.write(encoder.encode({"error":traceback.format_exc()}) + "\n")
+		finally:
 			sys.stdout.flush()

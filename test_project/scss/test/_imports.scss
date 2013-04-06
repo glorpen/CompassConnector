@@ -2,6 +2,9 @@
 @import "/style.css";
 
 styles {
-	url1: stylesheet-url("style.css");
-	url2: stylesheet-url("style.css", true);
+	url-vendor1: stylesheet-url("style.css");
+	url-vendor2: stylesheet-url("style.css", true);
+	
+	url-app1: stylesheet-url("/style.css");
+	url-app2: stylesheet-url("/style.css", true);
 } 
