@@ -1,5 +1,5 @@
-@import "style.css";			/* @test @import url(style.css); */
-@import "/style.css";			/* @test @import url(/style.css); */
+@import "style.css";			/* @test @import url(/vendors/css/style.css); */
+@import "/style.css";			/* @test @import url(/css/style.css); */
 
 styles {
 	url-vendor1: stylesheet-url("style.css");				/* @test url('/vendors/css/style.css'); */

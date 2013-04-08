@@ -7,3 +7,7 @@ CompassConnector::Resolver.configuration().each do |key,value|
   end
   Compass.configuration.send(key+"=", value)
 end
+
+Compass.configuration.http_path = "/"
+Compass.configuration.relative_assets = false
+Compass.configuration.cache_path = Compass.configuration.project_path + "/.sass-cache"

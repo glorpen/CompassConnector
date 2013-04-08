@@ -13,12 +13,7 @@ module Compass
         @sass_files = self.options[:sass_files]
       else
         @sass_files = []
-        if exclude_partials
-          out = CompassConnector::Resolver.list_main_files
-        else
-          out = CompassConnector::Resolver.list_scss_files
-        end
-        
+        out = CompassConnector::Resolver.list_main_files
         out.to_enum.each do |item|
           @sass_files << item.to_s
         end

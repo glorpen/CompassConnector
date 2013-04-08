@@ -1,11 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""
-set loaded vendor paths from ruby env? //nope
-without "private" folder - just single / is for app and without is for vendors
-"""
-
 import sys, simplejson
 from os.path import dirname,realpath,exists,join
 import os
@@ -15,6 +10,11 @@ import traceback
 root = realpath(dirname(__file__))
 
 re_schema = re.compile(r'^(([a-z0-9]+://)|(//))')
+
+"""
+check why @import reads file from current dir if matches
+remove CWD dependency in single_file mode - in cmdline sass files should be absolute paths
+"""
 
 def detect_vendor(allow_absolute=True):
 	
@@ -48,8 +48,6 @@ class Handler(object):
 	public_vendors = "/vendors/"
 	public_generated_images = "/generated-images/"
 	
-	#TODO collect file paths and mtimes
-	
 	def get_configuration(self):
 		return {
 			"environment" : ":development",
@@ -59,9 +57,6 @@ class Handler(object):
 			"generated_images_path" : self.out_generated_images_root,
 			"css_path" : self.out_stylesheets_root,
 			"sass_path" : self.scss_root,
-			
-			"http_path" : "/",
-			"relative_assets": False
 		}
 	
 	def list_main_files(self):
