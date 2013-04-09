@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
   s.version     = '0.5.1'
   s.date        = '2013-04-08'
   s.summary     = "Compass integration with any framework"
-  s.description = "Allows integration between Compass and any other framework"
+  s.description = "Allows integration between Compass and any other framework with corresponding other-framework connector."
   s.authors     = ["Arkadiusz Dzięgiel"]
   s.email       = 'admin@glorpen.pl'
   s.files       = Dir['lib/**/*.rb']
