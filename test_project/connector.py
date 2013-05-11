@@ -1,22 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys, simplejson
-from os.path import dirname,realpath,exists,join
-import os
-import re
-import traceback
-import base64
-import hashlib
+"""
+@author: Arkadiusz Dzięgiel
+"""
 
-root = realpath(dirname(__file__))
+from __future__ import print_function
+
+from os.path import dirname,realpath,exists,join
+import os, sys, re, traceback, base64, hashlib, json
 
 re_schema = re.compile(r'^(([a-z0-9]+://)|(//))')
-
-"""
-check why @import reads file from current dir if matches
-remove CWD dependency in single_file mode - in cmdline sass files should be absolute paths
-"""
 
 def detect_vendor(allow_absolute=True):
 	
@@ -38,23 +32,27 @@ def detect_vendor(allow_absolute=True):
 
 class Handler(object):
 	
-	scss_root = join(root,"scss")
-	images_root = join(root,"images")
-	fonts_root = join(root,"fonts")
-	vendors_root = join(root,"vendors")
-	sprites_root = root
-	
-	generated_images_root = join(root,"out","generated-images")
-	out_stylesheets_root = join(root,"out","css")
-	
 	public_fonts = "/fonts/"
 	public_css = "/css/"
 	public_images = "/images/"
 	public_vendors = "/vendors/"
 	public_generated_images = "/generated-images/"
 	
+	def __init__(self, root, config={}):
+		self.scss_root = join(root,"scss")
+		self.images_root = join(root,"images")
+		self.fonts_root = join(root,"fonts")
+		self.vendors_root = join(root,"vendors")
+		self.sprites_root = root
+		
+		self.generated_images_root = join(root,"out","generated-images")
+		self.out_stylesheets_root = join(root,"out","css")
+		
+		self.config = config
+		
+	
 	def get_configuration(self):
-		return {
+		c = {
 			"environment" : ":development",
 			"line_comments": True,
 			"output_style" : ":expanded", #nested, expanded, compact, compressed
@@ -63,6 +61,8 @@ class Handler(object):
 			"css_path" : "/dev/null",
 			"sass_path" : "/dev/null",
 		}
+		c.update(self.config)
+		return c
 	
 	def file_to_dict(self, filepath):
 		filepath = os.path.realpath(filepath)
@@ -107,9 +107,6 @@ class Handler(object):
 		else:
 			f = join(getattr(self, type_+"s_root"), path)
 		
-		if type_ == "output_css":
-			raise Exception("asd")
-		
 		return self.file_to_dict(f)
 	
 	def put_file(self, path, type_, data):
@@ -119,7 +116,7 @@ class Handler(object):
 		elif type_  == "css":
 			p = join(self.out_stylesheets_root, path.lstrip("/"))
 		else:
-			raise Exception(path, type_)
+			raise NotImplementedError(path, type_)
 		
 		with open(p,"wb") as f:
 			f.write(base64.decodestring(data))
@@ -147,24 +144,28 @@ class Handler(object):
 			return self.public_vendors + "css/" + path
 		else:
 			return self.public_css + path.lstrip("/")
-	
 
-h = Handler()
+	def run(self, *argv):
+		if len(argv)>1:
+			print(getattr(h, argv[1])(*argv[2:]))
+		else:
+			decoder = json.JSONDecoder()
+			encoder = json.JSONEncoder()
+			while True:
+				line = sys.stdin.readline()
+				if line == "":
+					break
+				try:
+					d = decoder.decode(line)
+					ret = getattr(h, d["method"])(*d["args"])
+					sys.stdout.write(encoder.encode(ret) + "\n")
+				except Exception as e:
+					sys.stdout.write(encoder.encode({"error":traceback.format_exc()}) + "\n")
+				finally:
+					sys.stdout.flush()
 
-if len(sys.argv)>1:
-	print getattr(h, sys.argv[1])(*sys.argv[2:])
-else:
-	decoder = simplejson.JSONDecoder()
-	encoder = simplejson.JSONEncoder()
-	while True:
-		line = sys.stdin.readline()
-		if line == "":
-			break
-		try:
-			d = decoder.decode(line)
-			ret = getattr(h, d["method"])(*d["args"])
-			sys.stdout.write(encoder.encode(ret) + "\n")
-		except Exception as e:
-			sys.stdout.write(encoder.encode({"error":traceback.format_exc()}) + "\n")
-		finally:
-			sys.stdout.flush()
+
+
+if __name__ == "__main__":
+	h = Handler(root = realpath(dirname(__file__)))
+	h.run(*sys.argv)

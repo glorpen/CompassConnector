@@ -15,7 +15,7 @@ module Compass
           @sass_files << shorten_path(f)
         }
       else
-        raise "Cannot compile project, only single files is supported"
+        raise "Cannot compile project, only single files are supported"
       end
       
       @sass_files
