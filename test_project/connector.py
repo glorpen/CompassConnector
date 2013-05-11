@@ -6,6 +6,8 @@ from os.path import dirname,realpath,exists,join
 import os
 import re
 import traceback
+import base64
+import hashlib
 
 root = realpath(dirname(__file__))
 
@@ -19,7 +21,7 @@ remove CWD dependency in single_file mode - in cmdline sass files should be abso
 def detect_vendor(allow_absolute=True):
 	
 	def decorator(fun):
-		def wrapper(self, path):
+		def wrapper(self, path, *args):
 			absolute = re_schema.match(path) is not None
 			if absolute:
 				if not allow_absolute:
@@ -27,7 +29,9 @@ def detect_vendor(allow_absolute=True):
 				else:
 					return path
 			vendor = not absolute and not path.startswith("/")
-			return fun(self, path, vendor)
+			args = list(args)
+			args.append(vendor)
+			return fun(self, path, *args)
 		return wrapper
 	
 	return decorator
@@ -38,8 +42,9 @@ class Handler(object):
 	images_root = join(root,"images")
 	fonts_root = join(root,"fonts")
 	vendors_root = join(root,"vendors")
+	sprites_root = root
 	
-	out_generated_images_root = join(root,"out","generated-images")
+	generated_images_root = join(root,"out","generated-images")
 	out_stylesheets_root = join(root,"out","css")
 	
 	public_fonts = "/fonts/"
@@ -54,22 +59,21 @@ class Handler(object):
 			"line_comments": True,
 			"output_style" : ":expanded", #nested, expanded, compact, compressed
 			
-			"generated_images_path" : self.out_generated_images_root,
-			"css_path" : self.out_stylesheets_root,
-			"sass_path" : self.scss_root,
+			"generated_images_path" : "/",
+			"css_path" : "/dev/null",
+			"sass_path" : "/dev/null",
 		}
 	
-	def list_main_files(self):
-		"""
-		list main scss files (which are compiled to own css)
-		"""
-		ret = []
-		for i in os.listdir(self.scss_root):
-			if not i.startswith("_") and i.endswith(".scss"):
-				ret.append(i)
-		return ret
-	
-	def find_scss(self, path):
+	def file_to_dict(self, filepath):
+		filepath = os.path.realpath(filepath)
+		
+		if not exists(filepath):
+			return None
+		
+		with open(filepath,"rb") as file:
+			return {"mtime":os.path.getmtime(filepath), "data": base64.encodestring(file.read()), "hash":hashlib.md5(filepath).hexdigest(), "ext": os.path.splitext(filepath)[1][1:]}
+		
+	def find_import(self, path):
 		"""
 		return full path for scss
 		"""
@@ -82,7 +86,9 @@ class Handler(object):
 		#check if file exists
 		f = join(self.scss_root, base, file)
 		#if not, try with underscore
-		return f if exists(f) else join(self.scss_root, base, "_"+file)
+		f = f if exists(f) else join(self.scss_root, base, "_"+file)
+		
+		return self.file_to_dict(f)
 	
 	@detect_vendor(True)
 	def get_image_url(self, path, vendor):
@@ -91,16 +97,33 @@ class Handler(object):
 		else:
 			return self.public_images + path[1:]
 	
-	@detect_vendor(False)
-	def find_image(self, path, vendor):
-		if vendor:
-			return join(self.vendors_root, "images", path)
+	@detect_vendor(True)
+	def get_file(self, path, type_, vendor):
+		
+		path = path.lstrip("/")
+		
+		if vendor and not type_ in ("generated_image", "out_stylesheet"):
+			f = join(self.vendors_root, type_+"s", path)
 		else:
-			return self.images_root + path
-			
+			f = join(getattr(self, type_+"s_root"), path)
+		
+		if type_ == "output_css":
+			raise Exception("asd")
+		
+		return self.file_to_dict(f)
 	
-	def find_generated_image(self, path):
-		return join(self.out_generated_images_root, path.lstrip("/"))
+	def put_file(self, path, type_, data):
+		
+		if type_  == "sprite":
+			p = join(self.generated_images_root, path.lstrip("/"))
+		elif type_  == "css":
+			p = join(self.out_stylesheets_root, path.lstrip("/"))
+		else:
+			raise Exception(path, type_)
+		
+		with open(p,"wb") as f:
+			f.write(base64.decodestring(data))
+		return True
 	
 	@detect_vendor(True)
 	def get_generated_image_url(self, path, vendor):
@@ -110,8 +133,6 @@ class Handler(object):
 	def find_sprites_matching(self, path):
 		pre,post = path.split("*")
 		return [pre+i for i in os.listdir(join(realpath(dirname(__file__)),pre[1:]))]
-	def find_sprite(self, path):
-		return join(realpath(dirname(__file__)),path[1:])
 	
 	@detect_vendor(True)
 	def get_font_url(self, path, vendor):
@@ -119,13 +140,6 @@ class Handler(object):
 			return join(self.public_vendors, "fonts", path)
 		else:
 			return self.public_fonts + path
-	
-	@detect_vendor(False)
-	def find_font(self, path, vendor):
-		if vendor:
-			return join(self.vendors_root, "fonts", path)
-		else:
-			return join(self.fonts_root, path.lstrip("/"))
 	
 	@detect_vendor(True)
 	def get_stylesheet_url(self, path, vendor):

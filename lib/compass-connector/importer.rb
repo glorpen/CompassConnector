@@ -8,13 +8,11 @@ module CompassConnector
     end
     
     def find(uri, options)
-      f = CompassConnector::Resolver.find_scss(uri)
+      f = CompassConnector::Resolver.find_import(uri)
       
       if f
-        f = f.to_s
-        syntax = (f =~ /\.(s[ac]ss)$/) && $1.to_sym || :sass
-        opts = options.merge(:syntax => syntax, :importer => self, :filename => f)
-        return Sass::Engine.new(open(f).read, opts)
+        opts = options.merge(:syntax => :scss, :importer => self, :filename => uri)
+        return Sass::Engine.new(f.read, opts)
       end
       
       nil
@@ -25,9 +23,6 @@ module CompassConnector
     end
     
     def mtime(name, options)
-      file, s = find_real_file(name)
-      File.mtime(file) if file
-    rescue Errno::ENOENT
       nil
     end
     

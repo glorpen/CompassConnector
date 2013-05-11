@@ -5,7 +5,7 @@ module Compass
     module Sprites
       class Image
         def find_file
-          CompassConnector::Resolver.find_sprite(relative_file).to_s
+          CompassConnector::Resolver.find_sprite(relative_file)
         end
       end
     end

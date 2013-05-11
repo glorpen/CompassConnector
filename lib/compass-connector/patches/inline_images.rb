@@ -4,8 +4,8 @@ module Compass::SassExtensions::Functions::InlineImage
 
   def inline_image(path, mime_type = nil)
     path = path.value
-    real_path = CompassConnector::Resolver.find_image(path)
-    inline_image_string(data(real_path), compute_mime_type(path, mime_type))
+    my_file = CompassConnector::Resolver.get_image(path)
+    inline_image_string(data(my_file.to_path), compute_mime_type(path, mime_type))
   end
 
   def inline_font_files(*args)
@@ -13,7 +13,7 @@ module Compass::SassExtensions::Functions::InlineImage
     files = []
     while args.size > 0
       path = args.shift.value
-      real_path = CompassConnector::Resolver.find_font(path)
+      real_path = CompassConnector::Resolver.get_font(path)
       url = inline_image_string(data(real_path), compute_mime_type(path))
       files << "#{url} format('#{args.shift}')"
     end

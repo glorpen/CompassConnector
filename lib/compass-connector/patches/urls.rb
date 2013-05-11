@@ -3,16 +3,17 @@ require 'compass/sass_extensions/functions/urls'
 module Compass::SassExtensions::Functions::Urls
   module ImageUrl
     def image_url(path, only_path = Sass::Script::Bool.new(false), cache_buster = Sass::Script::Bool.new(true))
-      path = path.value
+      org_path = path.value
       
-      real_path = CompassConnector::Resolver.find_image(path)
-      path = CompassConnector::Resolver.image_url(path)
+      path = CompassConnector::Resolver.image_url(org_path)
       
       # Compute and append the cache buster if there is one.
       if cache_buster.to_bool
         if cache_buster.is_a?(Sass::Script::String)
           path += "?#{cache_buster.value}"
         else
+          data = CompassConnector::Resolver.get_image(org_path)
+          real_path = data.to_path
           path = cache_busted_path(path, real_path)
         end
       end
@@ -52,16 +53,16 @@ module Compass::SassExtensions::Functions::Urls
   end
   module GeneratedImageUrl
     def generated_image_url(path, cache_buster = Sass::Script::Bool.new(false))
-      path = path.value # get to the string value of the literal.
+      org_path = path.value # get to the string value of the literal.
       
-      real_path = CompassConnector::Resolver.find_generated_image(path)
-      path = CompassConnector::Resolver.generated_image_url(path)
+      path = CompassConnector::Resolver.generated_image_url(org_path)
       
       # Compute and append the cache buster if there is one.
       if cache_buster.to_bool
         if cache_buster.is_a?(Sass::Script::String)
           path += "?#{cache_buster.value}"
         else
+          real_path = CompassConnector::Resolver.get_generated_image(org_path).to_path
           path = cache_busted_path(path, real_path)
         end
       end
