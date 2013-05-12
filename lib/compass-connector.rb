@@ -30,26 +30,16 @@ module CompassConnector
     
     private_class_method
       def self.resolver(method, *args)
-        if @process == nil
-          cmd = ENV["COMPASS_CONNECTOR"]
-          if cmd == nil
-            raise Compass::Error, "You have to define COMPASS_CONNECTOR env variable"
-          end
-          @process = IO.popen(cmd, "r+")
-        end
-        
         data_in = JSON::dump({'method' => method, 'args' => args})
-        #$stdout.puts "Process input: " + data_in
-        @process << data_in << "\n"
-        out = @process.gets
-        #$stdout.puts "Process output: " + out
+        STDOUT.puts data_in << "\n"
+        STDOUT.flush
+        out = STDIN.gets
         ret = JSON::load(out)
         if ret.kind_of?(Hash) and ret.has_key?("error")
           raise "Remote process error: " + ret["error"]
         end
         return ret
       end
-    
     
     def self.find_import(uri)
       FakeFile.from_response(resolver("find_import", uri))

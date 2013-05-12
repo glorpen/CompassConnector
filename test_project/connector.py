@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -9,6 +9,7 @@ from __future__ import print_function
 
 from os.path import dirname,realpath,exists,join
 import os, sys, re, traceback, base64, hashlib, json
+import subprocess
 
 re_schema = re.compile(r'^(([a-z0-9]+://)|(//))')
 
@@ -71,7 +72,7 @@ class Handler(object):
 			return None
 		
 		with open(filepath,"rb") as file:
-			return {"mtime":os.path.getmtime(filepath), "data": base64.encodestring(file.read()), "hash":hashlib.md5(filepath).hexdigest(), "ext": os.path.splitext(filepath)[1][1:]}
+			return {"mtime":os.path.getmtime(filepath), "data": base64.encodebytes(file.read()).decode(), "hash": hashlib.md5(filepath.encode()).hexdigest(), "ext": os.path.splitext(filepath)[1][1:]}
 		
 	def find_import(self, path):
 		"""
@@ -119,7 +120,7 @@ class Handler(object):
 			raise NotImplementedError(path, type_)
 		
 		with open(p,"wb") as f:
-			f.write(base64.decodestring(data))
+			f.write(base64.decodebytes(data.encode()))
 		return True
 	
 	@detect_vendor(True)
@@ -145,27 +146,39 @@ class Handler(object):
 		else:
 			return self.public_css + path.lstrip("/")
 
-	def run(self, *argv):
-		if len(argv)>1:
-			print(getattr(h, argv[1])(*argv[2:]))
-		else:
-			decoder = json.JSONDecoder()
-			encoder = json.JSONEncoder()
-			while True:
-				line = sys.stdin.readline()
-				if line == "":
-					break
-				try:
-					d = decoder.decode(line)
-					ret = getattr(h, d["method"])(*d["args"])
-					sys.stdout.write(encoder.encode(ret) + "\n")
-				except Exception as e:
-					sys.stdout.write(encoder.encode({"error":traceback.format_exc()}) + "\n")
-				finally:
-					sys.stdout.flush()
-
+	def run(self, proc):
+		decoder = json.JSONDecoder()
+		encoder = json.JSONEncoder()
+		bracet = re.compile(br'^(\x1b\x5b[0-9]{1,2}m?)?({.*)$')
+		while True:
+			line = proc.stdout.readline()
+			if not line: break
+			
+			m = bracet.match(line)
+			if m:
+				d = decoder.decode(m.group(2).decode())
+				#print("running %s with: %s" % (d["method"], ", ".join([(a if len(a)<40 else a[0:20]+"...") for a in d["args"]])))
+				ret = getattr(h, d["method"])(*d["args"])
+				proc.stdin.write(encoder.encode(ret).encode() + b"\n")
+				proc.stdin.flush()
+			else:
+				sys.stdout.write(line.decode())
+				sys.stdout.flush()
 
 
 if __name__ == "__main__":
-	h = Handler(root = realpath(dirname(__file__)))
-	h.run(*sys.argv)
+	command = ['/home/arkus/.gem/ruby/1.9.1/bin/compass','compile','-r','compass-connector', "app.scss"]
+	
+	decoder = json.JSONDecoder()
+	encoder = json.JSONEncoder()
+	
+	with subprocess.Popen(command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        stdin=subprocess.PIPE,
+        env = {
+			"HOME": os.environ["HOME"]
+		}) as proc:
+		
+		h = Handler(root = realpath(dirname(__file__)))
+		h.run(proc)
