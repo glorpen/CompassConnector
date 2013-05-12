@@ -75,9 +75,6 @@ class Handler(object):
 			return {"mtime":os.path.getmtime(filepath), "data": base64.encodebytes(file.read()).decode(), "hash": hashlib.md5(filepath.encode()).hexdigest(), "ext": os.path.splitext(filepath)[1][1:]}
 		
 	def find_import(self, path):
-		"""
-		return full path for scss
-		"""
 		base, file = os.path.split(path)
 		
 		#maybe from @import - without extension
@@ -168,9 +165,6 @@ class Handler(object):
 
 if __name__ == "__main__":
 	command = ['/home/arkus/.gem/ruby/1.9.1/bin/compass','compile','-r','compass-connector', "app.scss"]
-	
-	decoder = json.JSONDecoder()
-	encoder = json.JSONEncoder()
 	
 	with subprocess.Popen(command,
         stdout=subprocess.PIPE,
