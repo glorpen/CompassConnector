@@ -13,11 +13,11 @@ module Compass
         end
         
         def generation_required?
-          !File.exists?(tmp_filename) || outdated?
+          !(tmp_filename && File.exists?(tmp_filename)) || outdated?
         end
         
         def outdated?
-          if File.exists?(tmp_filename)
+          if tmp_filename && File.exists?(tmp_filename)
             return @images.any? {|image|
               image.mtime.to_i > self.mtime.to_i
           }

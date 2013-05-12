@@ -155,7 +155,7 @@ class Handler(object):
 			if m:
 				d = decoder.decode(m.group(2).decode())
 				#print("running %s with: %s" % (d["method"], ", ".join([(a if len(a)<40 else a[0:20]+"...") for a in d["args"]])))
-				ret = getattr(h, d["method"])(*d["args"])
+				ret = getattr(self, d["method"])(*d["args"])
 				proc.stdin.write(encoder.encode(ret).encode() + b"\n")
 				proc.stdin.flush()
 			else:
