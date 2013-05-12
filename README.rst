@@ -10,6 +10,18 @@ So, through connector you can scss to support:
 - assets in different bundles/modules/plugins (choose one used in your app)
 - asset url rewriting from your app
 
+Official repositories
+=====================
+
+For forking and other funnies
+
+
+BitBucket: https://bitbucket.org/glorpen/compassconnector - main repo
+
+
+GitHub: https://github.com/glorpen/CompassConnector
+
+
 Installation
 ============
 
