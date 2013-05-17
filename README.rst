@@ -2,9 +2,9 @@
 Glorpen CompassConnector
 ========================
 
-When loaded CompassConnector replaces internal compass methods and delegates it to remote process (given by *COMPASS_CONNECTOR* env variable). It allows compass to better match your project requirements.
+When loaded CompassConnector replaces internal compass methods and delegates it to remote process. Communication is passed through STDOUT/STDIN. It allows compass to better match your project requirements.
 
-So, through connector you can scss to support:
+So, through connector you can make scss support:
 
 - multiple images/css/fonts dir support
 - assets in different bundles/modules/plugins (choose one used in your app)
@@ -27,16 +27,6 @@ Installation
 
 `gem install compass-connector`
 
-Usage
-=====
-
-To compile whole project with eg. *zurb-foundation*:
-
-.. sourcecode:: bash
-
-   COMPASS_CONNECTOR=./connector.py ~/.gem/ruby/1.9.1/bin/compass compile -r zurb-foundation -r compass-connector .
-
-Remember to add *compass-connector* as last (`-r`) required library.
 
 Vendor and app paths
 ====================
@@ -60,7 +50,7 @@ Connectors allow any framework to integrate compass. Example connector can be fo
 Protocol
 ********
 
-Any data passed to or from connector is encoded as JSON, communication takes place through pipes.
+Any data passed to or from connector is encoded as JSON, communication takes place through normal STDOUT/STDIN - so your adapter needs to filter and respond to data emitted by compass process.
 
 On compass method call connector will receive following json:
 
