@@ -3,6 +3,38 @@
 
 """
 @author: Arkadiusz Dzięgiel
+
+vendor paths:
+- used only in compass plugins
+- are relative (eg. "image-url(some-image.png)")
+absolute paths:
+- http://, //, /
+- shouldn't be changed
+app paths (virtual paths):
+- starts with "@"
+- using external app/framework to resolve it
+
+
+get_file(path, type, mode) - zwraca obiekt pliku
+	path - virtual path
+	type - file type (np. image, css, itp)
+	mode - app, vendor
+
+get_url(path, type, mode) - returns object url
+	path - virtual path
+	typ - file type
+	mode - app, vendor
+
+get_configuration: dict
+find_sprites(path, mode) - zwraca listę virtualnych ścieżek do plików, eg: sprites/asd/asd @sprites/asdasd
+
+put_file(path, type, data)
+
+tryb absolute nie ma sensu przy find_file a przy get_url ścieżka nie powinna się zmienić
+
+file:
+	ext => rozszerzenie pliku (bez kropki)
+
 """
 
 from __future__ import print_function
@@ -11,44 +43,51 @@ from os.path import dirname,realpath,exists,join
 import os, sys, re, traceback, base64, hashlib, json
 import subprocess
 
-re_schema = re.compile(r'^(([a-z0-9]+://)|(//))')
-
-def detect_vendor(allow_absolute=True):
+class SimpleResolver(object):
 	
-	def decorator(fun):
-		def wrapper(self, path, *args):
-			absolute = re_schema.match(path) is not None
-			if absolute:
-				if not allow_absolute:
-					raise Exception()
-				else:
-					return path
-			vendor = not absolute and not path.startswith("/")
-			args = list(args)
-			args.append(vendor)
-			return fun(self, path, *args)
-		return wrapper
+	vendor_fonts_dir = "fonts"
+	vendor_images_dir = "images"
+	vendor_sprites_dir = vendor_images_dir
 	
-	return decorator
+	assets_dir = "assets"
+	generated_dir = 'generated-images'
+	
+	def __init__(self, root):
+		super(SimpleResolver, self).__init__()
+		self.root = root
+	
+	def list_vpaths(self, path, vendor):
+		pre,post = path.split("*")
+		search_path = join(self.root, "vendors", self.vendor_images_dir) if vendor else join(self.root, self.assets_dir)
+		return [("" if vendor else "@")+pre+i for i in os.listdir(join(search_path,pre))]
+	
+	def get_url(self, vpath, vendor, type_):
+		if vendor:
+			path = "vendor/"+getattr(self, "vendor_"+type_+"s_dir")+"/"
+		else:
+			path = "the-app/"+(self.generated_dir+"/" if type_ == "generated_image" else "")
+			
+		return "/%s%s" % (path, vpath)
+	
+	def get_filepath(self, vpath, vendor, type_):
+		if vendor:
+			path = ["vendors", getattr(self, "vendor_"+type_+"s_dir")]
+		else:
+			path = [] if type_ == "scss" else [self.assets_dir]
+			
+		path.append(vpath)
+		
+		return join(self.root, *path)
+	
+	def get_out_filepath(self, vpath, type_):
+		return join(*([self.root, "out"] + ([self.generated_dir] if type_ == "generated_image" else []) + [vpath]))
 
 class Handler(object):
 	
-	public_fonts = "/fonts/"
-	public_css = "/css/"
-	public_images = "/images/"
-	public_vendors = "/vendors/"
-	public_generated_images = "/generated-images/"
-	
 	def __init__(self, root, config={}):
-		self.scss_root = join(root,"scss")
-		self.images_root = join(root,"images")
-		self.fonts_root = join(root,"fonts")
-		self.vendors_root = join(root,"vendors")
-		self.sprites_root = root
+		self.root = root
 		
-		self.generated_images_root = join(root,"out","generated-images")
-		self.out_stylesheets_root = join(root,"out","css")
-		
+		self.resolver = SimpleResolver(self.root)
 		self.config = config
 		
 	
@@ -74,74 +113,41 @@ class Handler(object):
 		with open(filepath,"rb") as file:
 			return {"mtime":os.path.getmtime(filepath), "data": base64.encodebytes(file.read()).decode(), "hash": hashlib.md5(filepath.encode()).hexdigest(), "ext": os.path.splitext(filepath)[1][1:]}
 		
-	def find_import(self, path):
-		base, file = os.path.split(path)
-		
-		#maybe from @import - without extension
-		if not file.endswith(".scss"):
-			file+=".scss"
-		
-		#check if file exists
-		f = join(self.scss_root, base, file)
-		#if not, try with underscore
-		f = f if exists(f) else join(self.scss_root, base, "_"+file)
-		
-		return self.file_to_dict(f)
-	
-	@detect_vendor(True)
-	def get_image_url(self, path, vendor):
-		if vendor:
-			return self.public_vendors + "images/" + path
-		else:
-			return self.public_images + path[1:]
-	
-	@detect_vendor(True)
-	def get_file(self, path, type_, vendor):
+	def get_file(self, path, type_, mode):
 		
 		path = path.lstrip("/")
 		
-		if vendor and not type_ in ("generated_image", "out_stylesheet"):
-			f = join(self.vendors_root, type_+"s", path)
+		if type_ in ("generated_image", "out_css"):
+			f = self.resolver.get_out_filepath(path, type_)
 		else:
-			f = join(getattr(self, type_+"s_root"), path)
+			f = self.resolver.get_filepath(path, mode == "vendor", type_)
 		
 		return self.file_to_dict(f)
 	
 	def put_file(self, path, type_, data):
 		
-		if type_  == "sprite":
-			p = join(self.generated_images_root, path.lstrip("/"))
-		elif type_  == "css":
-			p = join(self.out_stylesheets_root, path.lstrip("/"))
+		if type_  in ("generated_image", "out_css"):
+			p = self.resolver.get_out_filepath(path.lstrip("/"), type_)
 		else:
 			raise NotImplementedError(path, type_)
+		
+		try:
+			os.makedirs(dirname(p))
+		except FileExistsError:
+			pass
 		
 		with open(p,"wb") as f:
 			f.write(base64.decodebytes(data.encode()))
 		return True
 	
-	@detect_vendor(True)
-	def get_generated_image_url(self, path, vendor):
-		#all generated images will end up in our path
-		return self.public_generated_images + path.lstrip("/")
+	def get_url(self, path, type_, mode):
+		return self.resolver.get_url(path, mode=="vendor", type_)
 	
-	def find_sprites_matching(self, path):
-		pre,post = path.split("*")
-		return [pre+i for i in os.listdir(join(realpath(dirname(__file__)),pre[1:]))]
-	
-	@detect_vendor(True)
-	def get_font_url(self, path, vendor):
-		if vendor:
-			return join(self.public_vendors, "fonts", path)
-		else:
-			return self.public_fonts + path
-	
-	@detect_vendor(True)
-	def get_stylesheet_url(self, path, vendor):
-		if vendor:
-			return self.public_vendors + "css/" + path
-		else:
-			return self.public_css + path.lstrip("/")
+	def api_version(self):
+		return 1
+		
+	def find_sprites_matching(self, path, mode):
+		return tuple(self.resolver.list_vpaths(path, mode=='vendor'))
 
 	def run(self, proc):
 		decoder = json.JSONDecoder()
@@ -154,8 +160,9 @@ class Handler(object):
 			m = bracet.match(line)
 			if m:
 				d = decoder.decode(m.group(2).decode())
-				#print("running %s with: %s" % (d["method"], ", ".join([(a if len(a)<40 else a[0:20]+"...") for a in d["args"]])))
+				print("running %s with: %s" % (d["method"], ", ".join([(a if len(a)<40 else a[0:20]+"...") for a in d["args"]])))
 				ret = getattr(self, d["method"])(*d["args"])
+				print(ret)
 				proc.stdin.write(encoder.encode(ret).encode() + b"\n")
 				proc.stdin.flush()
 			else:
@@ -164,11 +171,11 @@ class Handler(object):
 
 
 if __name__ == "__main__":
-	command = ['/home/arkus/.gem/ruby/1.9.1/bin/compass','compile','-r','compass-connector', "app.scss"]
+	command = ['/home/arkus/.gem/ruby/1.9.1/bin/compass','compile','-r','compass-connector','--trace', sys.argv[1]]
 	
 	with subprocess.Popen(command,
+		cwd = dirname(__file__)+"/cache",
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
         stdin=subprocess.PIPE,
         env = {
 			"HOME": os.environ["HOME"]

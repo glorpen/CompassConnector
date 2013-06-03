@@ -3,6 +3,8 @@ syntax: regexp
 ^\.project$
 ^\.settings$
 ^\.pydevproject$
-^test_project/.sass-cache$
+^test_project/cache$
 ^test_project/out/css$
 ^test_project/out/generated-images/sprites$
+^test_project/out/scss$
+^test_project/out/generated-images/vendor-.*$

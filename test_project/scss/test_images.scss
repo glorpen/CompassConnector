@@ -1,0 +1,13 @@
+@import "compass/css3/images";
+
+images {
+    vendor-image-url: image-url("vendor_1x1.png");					/* @test url('/vendors/images/vendor_1x1.png\?[0-9]+') */ 
+    app-image-url: image-url("@images/image.png");							/* @test url('/images/image.png\?[0-9]+'); */
+    width-app: image-width("@images/image.png");							/* @test 10px; */
+    width-vendor: image-width("vendor_image.png");					/* @test 10px; */
+    image-inline: inline-image("@images/1x1.png");							/* @test url('data:image/png;base64,iVBORw0KGgoAAAAN.* */
+    vendor-generated-image-busted: generated-image-url("1x1.png", true);	/* @test url('/generated-images/1x1.png\?[0-9]+'); */
+    vendor-generated-image: generated-image-url("1x1.png", false);			/* @test url('/generated-images/1x1.png'); */
+    generated-image-busted: generated-image-url("@1x1.png", true);  /* @test url('/generated-images/1x1.png\?[0-9]+'); */
+    generated-image: generated-image-url("@1x1.png", false);     /* @test url('/generated-images/1x1.png'); */ 
+}
