@@ -61,10 +61,6 @@ module CompassConnector
         path = path[1..-1]
       end
       
-      if type == "generated_image"
-        mode = "app"
-      end
-      
       return mode, path
     end
     
@@ -133,7 +129,7 @@ module CompassConnector
       resolver("find_sprites_matching", path, mode)
     end
     def self.find_sprite(file)
-      self.get_file(file, "sprite")
+      self.get_file(file, "image")
     end
     def self.get_font(file)
       self.get_file(file, "font")
@@ -147,11 +143,11 @@ module CompassConnector
     def self.put_sprite(filename, f)
       filename = filename.gsub(/^\//, "")
       mode, path = self.get_mode_and_path(filename)
-      resolver("put_file", path, "generated_image", Base64.encode64(f.read))
+      resolver("put_file", path, "generated_image", Base64.encode64(f.read), mode)
     end
     def self.put_output_css(filename, data)
       mode, path = self.get_mode_and_path(filename,"app")
-      resolver("put_file", path, "out_css", Base64.encode64(data))
+      resolver("put_file", path, "out_css", Base64.encode64(data), mode)
     end
     def self.get_output_css(filename)
       self.get_file(filename, "out_css", "app")

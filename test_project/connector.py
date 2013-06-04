@@ -49,8 +49,12 @@ class SimpleResolver(object):
 	vendor_images_dir = "images"
 	vendor_sprites_dir = vendor_images_dir
 	
+	app_prefix = "/the-app"
+	vendor_prefix = "/vendor"
+	
 	assets_dir = "assets"
 	generated_dir = 'generated-images'
+	vendor_generated_images_dir = generated_dir
 	
 	def __init__(self, root):
 		super(SimpleResolver, self).__init__()
@@ -63,11 +67,11 @@ class SimpleResolver(object):
 	
 	def get_url(self, vpath, vendor, type_):
 		if vendor:
-			path = "vendor/"+getattr(self, "vendor_"+type_+"s_dir")+"/"
+			path = self.vendor_prefix+"/"+getattr(self, "vendor_"+type_+"s_dir")+"/"
 		else:
-			path = "the-app/"+(self.generated_dir+"/" if type_ == "generated_image" else "")
+			path = self.app_prefix+"/"+(self.generated_dir+"/" if type_ == "generated_image" else "")
 			
-		return "/%s%s" % (path, vpath)
+		return "%s%s" % (path, vpath)
 	
 	def get_filepath(self, vpath, vendor, type_):
 		if vendor:
@@ -124,7 +128,7 @@ class Handler(object):
 		
 		return self.file_to_dict(f)
 	
-	def put_file(self, path, type_, data):
+	def put_file(self, path, type_, data, mode):
 		
 		if type_  in ("generated_image", "out_css"):
 			p = self.resolver.get_out_filepath(path.lstrip("/"), type_)
