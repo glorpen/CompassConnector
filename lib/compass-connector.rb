@@ -1,8 +1,9 @@
-require 'compass'
-
+require 'rubygems'
+gem 'json', '>= 1.6.2'
 require 'json'
-require 'base64'
 
+require 'compass'
+require 'base64'
 require 'compass-connector/importer'
 
 module CompassConnector
