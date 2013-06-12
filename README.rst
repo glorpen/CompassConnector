@@ -6,12 +6,13 @@ Simply put - it allows compass to better match your project requirements. This g
 
 When loaded CompassConnector replaces internal compass methods and delegates them to another app. Communication is passed through STDOUT/STDIN as JSON. It is up to remote connector to provide needed files/urls.
 
-So, through connector you can make scss support:
+So, through connector you can make your scss assets support:
 
 - multiple images/css/fonts dir
 - assets in different bundles/modules/plugins (choose one used in your app :) )
 - asset url routing from your app
 - detecting scss file dependencies (inlined fonts, images, @imports)
+- loading compass plugins with given version
 
 Official repositories
 =====================
@@ -99,6 +100,8 @@ Connector should implement following methods:
 - ``array get_configuration``
 
   Any key/value pair returned will be applied to compass configuration object. Keys prefixed with **:** will be handled as *symbol*. See http://compass-style.org/help/tutorials/configuration-reference/
+  
+  Additional key *plugins* appeared in v0.8 which can be list of plugins to require or array where values should be required version - as in ``gem 'zurb-foundation', '>4'``.
 
 - ``integer api_version()``
 

@@ -28,7 +28,7 @@ module CompassConnector
   class Resolver
     
     @process = nil
-    @api_version = 1
+    @api_version = 2
     
     private_class_method
       def self.resolver(method, *args)
