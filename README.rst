@@ -35,7 +35,7 @@ Remote Connectors
 
 - Python
 
-  - webassets: *in progress*
+  - webassets: https://bitbucket.org/glorpen/webassets_compassconnector
 
 
 Installation
