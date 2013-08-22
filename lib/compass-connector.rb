@@ -28,7 +28,7 @@ module CompassConnector
   class Resolver
     
     @process = nil
-    @api_version = 2
+    @api_version = 3
     
     private_class_method
       def self.resolver(method, *args)
@@ -47,7 +47,10 @@ module CompassConnector
       if path =~ /^@/
         return "app"
       end
-      if path =~ %r!^(([a-z0-9]+:/)?/)!
+      if path =~ %r!^(([a-z0-9]+:)?//)!
+        return "schema"
+      end
+      if path =~ %r!^/!
         return "absolute"
       end
       "vendor"
@@ -68,7 +71,7 @@ module CompassConnector
     def self.get_url(path, type, required_mode=nil)
       mode, path = self.get_mode_and_path(path, required_mode, type)
       
-      if mode == "absolute"
+      if mode == "schema"
         path
       else
         resolver("get_url", path, type, mode)
