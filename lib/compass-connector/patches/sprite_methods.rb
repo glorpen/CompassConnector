@@ -7,8 +7,7 @@ module Compass
       module SpriteMethods
         
         def tmp_filename
-          fname = File.join(Compass.configuration.generated_images_path, name_and_hash)
-          f = CompassConnector::Resolver.get_generated_sprite(fname)
+          f = CompassConnector::Resolver.get_generated_sprite(name_and_hash)
           f && f.to_path || nil
         end
         

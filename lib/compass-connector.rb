@@ -125,7 +125,6 @@ module CompassConnector
       self.get_file(path, "generated_image")
     end
     def self.get_generated_sprite(path)
-      path = path.gsub(/^\//, "")
       self.get_file(path, "generated_image")
     end
     def self.find_sprites_matching(uri)
@@ -145,7 +144,6 @@ module CompassConnector
       self.get_url(path, "css")
     end
     def self.put_sprite(filename, f)
-      filename = filename.gsub(/^\//, "")
       mode, path = self.get_mode_and_path(filename)
       resolver("put_file", path, "generated_image", Base64.encode64(f.read), mode)
     end
