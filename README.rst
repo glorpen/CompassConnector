@@ -101,7 +101,10 @@ Connector should implement following methods:
 
   Any key/value pair returned will be applied to compass configuration object. Keys prefixed with **:** will be handled as *symbol*. See http://compass-style.org/help/tutorials/configuration-reference/
   
-  Additional key *plugins* appeared in v0.8 which can be list of plugins to require or array where values should be required version - as in ``gem 'zurb-foundation', '>4'``.
+  Additional keys:
+  
+  - *plugins* appeared in v0.8 which can be list of plugins to require or array where values should be required version - as in ``gem 'zurb-foundation', '>4'``.
+  - *imports* appeared in v0.8.3 which can be list of paths for compass to search for additional files to import.
 
 - ``integer api_version()``
 

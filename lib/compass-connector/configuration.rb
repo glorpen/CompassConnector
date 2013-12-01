@@ -6,6 +6,10 @@ CompassConnector::Resolver.configuration().each do |key,value|
       gem lib, version
       require lib
     end
+  elsif key == "imports"
+    value.each do |path|
+      Compass.configuration.add_import_path path
+    end
   else
     if value.is_a?String and value.start_with?(":")
       value[0]=''

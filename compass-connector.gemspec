@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'compass-connector'
-  s.version     = '0.8.2'
-  s.date        = '2013-05-18'
+  s.version     = '0.8.3'
+  s.date        = '2013-12-01'
   s.summary     = "Compass integration with any framework"
   s.description = "Allows integration between Compass and any other framework with corresponding other-framework connector."
   s.authors     = ["Arkadiusz Dzięgiel"]
