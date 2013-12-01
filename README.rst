@@ -58,7 +58,7 @@ Below is example of possible values for given path:
 .. sourcecode:: css
 
    test {
-      absolute-url: image-url("/satic/image.png");     /* => /static/image.png */
+      absolute-url: image-url("/staic/image.png");     /* => /static/image.png */
       vendor-url: image-url("foundation/image.png");  /* => /vendor/images/foundation/image.png */
       app-url: image-url("@SomeSchema:handled:by-remote"); /* => /your/app/SomeSchema/data/handled/by-remote
    }
